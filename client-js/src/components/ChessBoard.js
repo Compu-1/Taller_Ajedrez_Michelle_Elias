@@ -80,7 +80,58 @@ export class ChessBoard {
      *        - Insertar el indicador dentro de la casilla.
      */
     render(gameState, selectedSquare, legalMoves = []) {
-        // TODO: Implementar el renderizado del tablero según la especificación de requerimientos de arriba.
+        // RF-01: validación previa, sin lanzar errores.
+        if (!gameState || !gameState.board) {
+            return;
+        }
+
+        // RF-02: origen y destino de la última jugada (MoveRecord.fromPos / toPos).
+        let lastFrom = null;
+        let lastTo = null;
+        const moves = gameState.moves;
+        if (moves && moves.length > 0) {
+            const last = moves[moves.length - 1];
+            lastFrom = last.fromPos || null;
+            lastTo = last.toPos || null;
+        }
+
+        const isSame = (pos, r, c) => !!pos && pos.row === r && pos.col === c;
+
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                const tile = this.tiles[r][c];
+                const piece = gameState.board[r] ? gameState.board[r][c] : null;
+                const hasPiece = !!piece && !!piece.type && piece.type._name !== "PIECEEMPTY";
+
+                // Reset: clase base y ademas limpiar hijos de la renderización anterior.
+                tile.className = `tile ${(r + c) % 2 === 0 ? "light" : "dark"}`;
+                tile.replaceChildren();
+
+                if (isSame(lastFrom, r, c) || isSame(lastTo, r, c)) {
+                    tile.classList.add("last-move");
+                }
+                if (isSame(selectedSquare, r, c)) {
+                    tile.classList.add("selected");
+                }
+
+                // RF-03: pieza.
+                if (hasPiece) {
+                    const span = document.createElement("span");
+                    span.className = piece.color && piece.color._name === "COLORWHITE"
+                        ? "piece-white"
+                        : "piece-black";
+                    span.textContent = getPieceGlyph(piece);
+                    tile.appendChild(span);
+                }
+
+                // RF-04: movimiento (sugerencias).
+                if (legalMoves && legalMoves.some(m => m.row === r && m.col === c)) {
+                    const indicator = document.createElement("div");
+                    indicator.className = hasPiece ? "capture-ring" : "move-dot";
+                    tile.appendChild(indicator);
+                }
+            }
+        }
     }
 
     getElement() {
