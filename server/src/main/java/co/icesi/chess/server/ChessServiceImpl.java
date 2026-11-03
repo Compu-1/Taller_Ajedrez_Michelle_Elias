@@ -42,9 +42,11 @@ public class ChessServiceImpl implements ChessService {
     public void registerObserver(String roomCode, String nickname, ChessObserverPrx observer, Current current) {
         try {
             GameRoom room = roomManager.getRoom(roomCode);
-            // TODO (Paso 2 del Taller): Soportar conexiones bidireccionales (BiDir) desde WebSockets.
-            // Cuando el cliente Web registra un proxy sin endpoints (observer.ice_getEndpoints().length == 0),
-            // vincular el proxy a la conexion entrante actual (current.con) usando observer.ice_fixed(current.con).
+            // BiDir: el cliente Web no puede abrir puertos, por lo que su proxy llega sin endpoints.
+            // Se fija a la conexion WebSocket entrante para enviarle los callbacks por ese mismo canal.
+            if (observer != null && observer.ice_getEndpoints().length == 0 && current.con != null) {
+                observer = observer.ice_fixed(current.con);
+            }
             room.registerObserver(nickname, observer);
         } catch (RoomNotFoundException ignored) {
         }
