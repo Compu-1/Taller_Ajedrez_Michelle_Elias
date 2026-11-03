@@ -40,19 +40,69 @@ export class MoveHistory {
         this.build();
     }
 
+    // RF-01: estructura del componente.
     build() {
         // TODO: Construir la estructura DOM según la especificación del requerimiento 1.
+
+        this.element.className = "moves-card";
+
+        const header = document.createElement("div");
+        header.className = "player-card-header";
+        header.textContent = "Historial de Jugadas";
+
+        this.listContainer.id = "moves-list";
+        this.listContainer.className = "moves-list";
+
+        this.element.appendChild(header);
+        this.element.appendChild(this.listContainer);
+
+        this.renderEmpty();
     }
 
+    // RF-01: estado vacío.
     renderEmpty() {
         // TODO: Mostrar el estado vacío según la especificación del requerimiento 2.
+        
+        this.listContainer.replaceChildren();
+        const em = document.createElement("em");
+        em.textContent = "Sin jugadas aún";
+        this.listContainer.appendChild(em);
     }
 
+    // RF-02 y RF-03: agrupación por turnos y auto-scroll.
     update(moves) {
         // TODO: Procesar el arreglo de jugadas según la especificación del requerimiento 3.
+
+        if (!moves || moves.length === 0) {
+            this.renderEmpty();
+            return;
+        }
+
+        this.listContainer.replaceChildren();
+
+        // De dos en dos: moves[i] = blancas, moves[i + 1] = negras (puede que no exista).
+        for (let i = 0; i < moves.length; i += 2) {
+            const turnNumber = i / 2 + 1;
+            const whiteMove = moves[i].moveNotation;
+            const blackMove = moves[i + 1] ? moves[i + 1].moveNotation : "";
+
+            const row = document.createElement("div");
+
+            const strong = document.createElement("strong");
+            strong.textContent = `${turnNumber}. `;
+
+            const text = document.createTextNode(blackMove ? `${whiteMove} ${blackMove}` : whiteMove);
+
+            row.appendChild(strong);
+            row.appendChild(text);
+            this.listContainer.appendChild(row);
+        }
+
+        // Mantener visible la última jugada
+        this.listContainer.scrollTop = this.listContainer.scrollHeight;
     }
 
-    getElement() {
+    getElement() {  
         return this.element;
     }
 }

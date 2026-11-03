@@ -69,6 +69,24 @@ export class PlayerCard {
      */
     update(nickname, points, capturedPieces) {
         // TODO: Implementar la actualización de la tarjeta según la especificación de requerimientos de arriba.
+
+        // RF-01: nombre (o el nombre por defecto) y puntaje (1200 si no es numérico).
+        this.nameEl.textContent = nickname || this.defaultName;
+
+        const pts = (typeof points === "number" && !Number.isNaN(points)) ? points : 1200;
+        this.pointsEl.textContent = `${pts} pts`;
+
+        // RF-02: insignia de tier según los puntos.
+        this.tierBadge.update(calculateTierFromPoints(pts));
+
+        // RF-02: piezas capturadas como glifos separados por espacio.
+        if (!capturedPieces || capturedPieces.length === 0) {
+            this.capturedEl.textContent = "";
+        } else {
+            this.capturedEl.textContent = Array.from(capturedPieces)
+                .map(p => getPieceGlyph(p, this.capturedColorKey))
+                .join(" ");
+        }
     }
 
     getElement() {
