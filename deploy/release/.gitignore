@@ -1,0 +1,5 @@
+# Archivos que se crean al desplegar en el Linux
+nginx.conf
+nginx.pid
+*.log
+data/

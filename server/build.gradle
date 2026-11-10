@@ -15,3 +15,20 @@ task runServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
 }
+
+// Jar ejecutable para despliegue: incluye common e Ice (java -jar app.jar)
+tasks.register('fatJar', Jar) {
+    group = 'build'
+    description = 'Genera server/build/libs/app.jar con todas las dependencias'
+    archiveFileName = 'app.jar'
+    manifest {
+        attributes 'Main-Class': 'co.icesi.chess.server.ChessServerApp'
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+}
